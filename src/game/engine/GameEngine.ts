@@ -442,6 +442,8 @@ export class GameEngine {
 
     this.checkAttackCollisions();
 
+    this.inputManager.update();
+
     if (this.inputManager.isKeyDown('KeyR')) {
       this.resetGame();
     }

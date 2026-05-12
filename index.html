@@ -1558,6 +1558,12 @@
           }
         }
       }
+      
+      if (currentMode === 'classic') {
+        if (checkWinByFlags()) {
+          gameOver(true);
+        }
+      }
     }
 
     function autoReveal(row, col) {

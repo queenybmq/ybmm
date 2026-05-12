@@ -46,17 +46,19 @@
       -webkit-user-select: none;
     }
 
-    .game-wrapper {
+    .game-container {
       width: 100%;
       max-width: 560px;
       display: flex;
       flex-direction: column;
       gap: 20px;
+      align-items: center;
     }
 
     .game-header {
       text-align: center;
       padding: 8px 0;
+      width: 100%;
     }
 
     .game-title {
@@ -228,6 +230,22 @@
     }
 
     .grid-container {
+      display: inline-block;
+      background: var(--block-shadow);
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: 
+        6px 6px 12px var(--block-dark),
+        -3px -3px 8px var(--block-highlight);
+    }
+
+    .grid-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .grid-container {
       background: var(--block-shadow);
       padding: 8px;
       border-radius: 12px;
@@ -237,7 +255,7 @@
     }
 
     .grid {
-      display: grid;
+      display: inline-grid;
       gap: 2px;
     }
 
@@ -813,8 +831,10 @@
       </div>
     </div>
 
-    <div class="grid-container">
-      <div class="grid" id="grid"></div>
+    <div class="grid-wrapper">
+      <div class="grid-container">
+        <div class="grid" id="grid"></div>
+      </div>
     </div>
 
     <div class="difficulty-selector">

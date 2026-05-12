@@ -6,26 +6,27 @@
   <title>扫雷 - Minesweeper</title>
   <style>
     :root {
-      --bg: #F5F3EF;
-      --block-base: #E8E4DC;
-      --block-highlight: #FFFFFF;
-      --block-shadow: #C4C0B8;
-      --block-dark: #B8B4AC;
-      --text-muted: #9A9690;
-      --color-1: #5C8BC9;
-      --color-2: #6BA572;
-      --color-3: #D66B6B;
-      --color-4: #8B6BB9;
-      --color-5: #C96B6B;
-      --color-6: #6BB5B5;
-      --color-7: #4A4A4A;
+      --bg: #f0ebe3;
+      --block-base: #e8e4dc;
+      --block-highlight: #ffffff;
+      --block-shadow: #c4c0b8;
+      --block-dark: #b8b4ac;
+      --text-muted: #9a9690;
+      --text-primary: #4a4a4a;
+      --color-1: #5c8bc9;
+      --color-2: #6ba572;
+      --color-3: #d66b6b;
+      --color-4: #8b6bb9;
+      --color-5: #c9966b;
+      --color-6: #6bb5b5;
+      --color-7: #4a4a4a;
       --color-8: #888888;
-      --mine: #2D2D2D;
-      --flag: #D66B6B;
+      --mine: #2d2d2d;
+      --flag: #d66b6b;
       --cell-size: 36px;
-      --gold: #D4AF37;
-      --silver: #C0C0C0;
-      --bronze: #CD7F32;
+      --gold: #d4af37;
+      --silver: #c0c0c0;
+      --bronze: #cd7f32;
     }
 
     * {
@@ -36,69 +37,133 @@
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
+      background: linear-gradient(180deg, var(--bg) 0%, #e5e1d9 100%);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px 16px;
       user-select: none;
       -webkit-user-select: none;
     }
 
-    .game-container {
+    .game-wrapper {
+      width: 100%;
+      max-width: 560px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 24px;
+      gap: 20px;
     }
 
-    .header {
+    .game-header {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .game-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: 2px;
+    }
+
+    .game-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      background: var(--block-shadow);
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: 
+        inset 2px 2px 4px var(--block-dark),
+        inset -2px -2px 4px var(--block-highlight);
+    }
+
+    .mode-btn {
+      flex: 1;
       display: flex;
       align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .mode-btn.active {
+      background: var(--block-highlight);
+      color: var(--color-3);
+      box-shadow: 
+        2px 2px 4px var(--block-shadow),
+        -1px -1px 3px var(--block-highlight);
+    }
+
+    .mode-icon {
+      font-size: 16px;
+    }
+
+    .header-bar {
+      display: flex;
       justify-content: space-between;
-      width: 100%;
-      max-width: 500px;
-      padding: 0 8px;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--block-base);
+      border-radius: 12px;
+      box-shadow: 
+        4px 4px 8px var(--block-shadow),
+        -2px -2px 6px var(--block-highlight);
     }
 
     .stat-box {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: var(--block-base);
-      padding: 8px 16px;
-      border-radius: 8px;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--block-shadow);
+      border-radius: 6px;
       box-shadow: 
-        inset 2px 2px 4px var(--block-highlight),
-        inset -2px -2px 4px var(--block-shadow);
+        inset 2px 2px 3px var(--block-dark),
+        inset -1px -1px 2px var(--block-highlight);
     }
 
     .stat-icon {
-      font-size: 18px;
+      font-size: 16px;
     }
 
     .stat-value {
-      font-size: 20px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
       color: var(--color-3);
-      min-width: 36px;
+      min-width: 32px;
       text-align: center;
       font-variant-numeric: tabular-nums;
     }
 
     .face-btn {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: var(--block-base);
       box-shadow: 
-        4px 4px 8px var(--block-shadow),
-        -2px -2px 6px var(--block-highlight);
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
       cursor: pointer;
-      font-size: 28px;
+      font-size: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -107,10 +172,59 @@
 
     .face-btn:active {
       box-shadow: 
-        2px 2px 4px var(--block-shadow),
+        1px 1px 3px var(--block-shadow),
         inset 2px 2px 4px var(--block-shadow),
         inset -2px -2px 4px var(--block-highlight);
       transform: translate(1px, 1px);
+    }
+
+    .score-display {
+      display: flex;
+      gap: 12px;
+    }
+
+    .score-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 14px;
+      background: var(--block-shadow);
+      border-radius: 6px;
+      box-shadow: 
+        inset 2px 2px 3px var(--block-dark),
+        inset -1px -1px 2px var(--block-highlight);
+    }
+
+    .score-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .score-value {
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #score {
+      color: var(--color-1);
+    }
+
+    #combo {
+      color: var(--color-3);
+    }
+
+    .combo-value.active {
+      animation: comboPop 0.3s ease;
+    }
+
+    @keyframes comboPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
     }
 
     .grid-container {
@@ -146,55 +260,27 @@
     }
 
     .cell:hover:not(.revealed):not(.game-over) {
-      background: linear-gradient(145deg, #F0F0F0, var(--block-base));
+      background: linear-gradient(145deg, #f5f5f5, var(--block-base));
     }
 
     .cell:active:not(.revealed):not(.game-over) {
+      background: var(--block-shadow);
       box-shadow: 
-        inset 1px 1px 2px var(--block-shadow),
+        inset 1px 1px 2px var(--block-dark),
         inset -1px -1px 2px var(--block-highlight);
-      transform: scale(0.98);
     }
 
     .cell.revealed {
-      background: var(--block-base);
+      background: var(--block-shadow);
       box-shadow: 
-        inset 1px 1px 3px var(--block-shadow);
+        inset 2px 2px 4px var(--block-dark),
+        inset -1px -1px 2px var(--block-highlight);
       cursor: default;
     }
 
-    .cell.flagged {
-      position: relative;
-    }
-
     .cell.flagged::after {
-      content: '';
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      background: var(--flag);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      animation: flagPop 0.2s ease;
-    }
-
-    @keyframes flagPop {
-      0% { transform: scale(0); }
-      70% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    .cell.mine-hit {
-      background: var(--color-3);
-      animation: minePulse 0.5s ease;
-    }
-
-    @keyframes minePulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .cell.mine {
-      background: var(--block-base);
+      content: '🚩';
+      font-size: 16px;
     }
 
     .cell.mine::after {
@@ -203,7 +289,11 @@
       height: 16px;
       background: var(--mine);
       border-radius: 50%;
-      box-shadow: 0 0 4px var(--mine);
+      box-shadow: 0 0 3px var(--mine);
+    }
+
+    .cell.mine-hit::after {
+      background: var(--color-3);
     }
 
     .cell[data-num="1"] { color: var(--color-1); }
@@ -215,44 +305,172 @@
     .cell[data-num="7"] { color: var(--color-7); }
     .cell[data-num="8"] { color: var(--color-8); }
 
+    .cell.game-over {
+      opacity: 0.85;
+    }
+
     .difficulty-selector {
       display: flex;
       gap: 8px;
-    }
-
-    .diff-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: var(--block-base);
+      padding: 8px;
+      background: var(--block-shadow);
+      border-radius: 10px;
       box-shadow: 
-        3px 3px 6px var(--block-shadow),
-        -2px -2px 4px var(--block-highlight);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-      transition: all 0.15s ease;
-    }
-
-    .diff-btn:hover {
-      color: var(--color-7);
-    }
-
-    .diff-btn.active {
-      color: var(--color-3);
-      box-shadow: 
-        inset 2px 2px 4px var(--block-shadow),
+        inset 2px 2px 4px var(--block-dark),
         inset -2px -2px 4px var(--block-highlight);
     }
 
-    .difficulty-selector {
-      touch-action: manipulation;
+    .diff-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
     }
 
-    .leaderboard-container {
+    .diff-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .diff-btn.active {
+      background: var(--block-highlight);
+      color: var(--color-3);
+      box-shadow: 
+        2px 2px 4px var(--block-shadow),
+        -1px -1px 3px var(--block-highlight);
+    }
+
+    .diff-icon {
+      font-size: 14px;
+    }
+
+    .settings-section {
+      background: var(--block-base);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
+    }
+
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       width: 100%;
-      max-width: 500px;
+      padding: 14px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .settings-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .settings-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-arrow {
+      font-size: 10px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .settings-toggle.active .toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .settings-panel {
+      padding: 0 16px 16px;
+      display: none;
+    }
+
+    .settings-panel.show {
+      display: block;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--block-shadow);
+      border-radius: 8px;
+      gap: 12px;
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .setting-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--block-dark);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch.active {
+      background: var(--color-3);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--block-highlight);
+      border-radius: 50%;
+      box-shadow: 0 2px 3px var(--block-dark);
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+
+    .leaderboard-section {
+      background: var(--block-base);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
     }
 
     .leaderboard-header {
@@ -260,32 +478,34 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .leaderboard-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--color-7);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .leaderboard-tabs {
       display: flex;
       gap: 4px;
-      background: var(--block-base);
+      background: var(--block-shadow);
       padding: 4px;
       border-radius: 8px;
     }
 
     .leaderboard-tab {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border: none;
       border-radius: 6px;
       background: transparent;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
       transition: all 0.15s ease;
@@ -293,45 +513,39 @@
 
     .leaderboard-tab.active {
       background: var(--block-highlight);
-      color: var(--color-7);
-      box-shadow: 0 2px 4px var(--block-shadow);
+      color: var(--color-3);
+      box-shadow: 0 1px 3px var(--block-dark);
     }
 
     .leaderboard {
-      background: var(--block-base);
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 
-        3px 3px 6px var(--block-shadow),
-        -2px -2px 4px var(--block-highlight);
+      background: var(--block-shadow);
+      border-radius: 8px;
+      padding: 6px;
     }
 
     .leaderboard-list {
       list-style: none;
-      padding: 0;
-      margin: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
     }
 
     .leaderboard-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 12px;
+      gap: 10px;
+      padding: 8px 10px;
       background: var(--block-highlight);
-      border-radius: 8px;
-      box-shadow: inset 0 1px 2px var(--block-shadow);
+      border-radius: 6px;
     }
 
     .leaderboard-rank {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
     }
@@ -342,14 +556,14 @@
 
     .leaderboard-name {
       flex: 1;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-7);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .leaderboard-time {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--color-3);
       font-variant-numeric: tabular-nums;
     }
@@ -358,90 +572,14 @@
       text-align: center;
       padding: 20px;
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 13px;
     }
 
-    .new-record-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--block-highlight);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      min-width: 280px;
-    }
-
-    .new-record-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--color-7);
+    .game-footer {
       text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .new-record-time {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--color-3);
-      text-align: center;
-      margin-bottom: 20px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .new-record-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid var(--block-shadow);
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-7);
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s ease;
-      background: var(--bg);
-    }
-
-    .new-record-input:focus {
-      border-color: var(--color-1);
-    }
-
-    .new-record-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .new-record-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .new-record-btn.submit {
-      background: var(--color-1);
-      color: white;
-    }
-
-    .new-record-btn.submit:hover {
-      background: #4a7ab0;
-    }
-
-    .new-record-btn.cancel {
-      background: var(--block-shadow);
-      color: var(--color-7);
-    }
-
-    .new-record-btn.cancel:hover {
-      background: var(--block-dark);
+      padding: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
     }
 
     .modal-overlay {
@@ -451,327 +589,269 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(3px);
       z-index: 999;
+    }
+
+    .new-record-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--block-highlight);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+      min-width: 280px;
+      text-align: center;
+    }
+
+    .modal-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .modal-icon {
+      font-size: 48px;
+    }
+
+    .new-record-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .new-record-score {
+      margin-bottom: 20px;
+    }
+
+    .score-number {
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--color-3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .new-record-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--block-shadow);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s ease;
+      background: var(--bg);
+    }
+
+    .new-record-input:focus {
+      border-color: var(--color-3);
+    }
+
+    .new-record-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .new-record-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .new-record-btn.submit {
+      background: var(--color-3);
+      color: white;
+    }
+
+    .new-record-btn.submit:hover {
+      background: #c55555;
+      transform: translateY(-2px);
+    }
+
+    .new-record-btn.cancel {
+      background: var(--block-shadow);
+      color: var(--text-primary);
+    }
+
+    .new-record-btn.cancel:hover {
+      background: var(--block-dark);
     }
 
     @keyframes winShake {
       0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-3px); }
-      40% { transform: translateX(3px); }
-      60% { transform: translateX(-3px); }
-      80% { transform: translateX(3px); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
     }
 
     .grid.win {
-      animation: winShake 0.4s ease;
-    }
-
-    @media (max-width: 600px) {
-      :root {
-        --cell-size: 32px;
-      }
-      
-      .stat-box {
-        padding: 6px 12px;
-      }
-      
-      .stat-value {
-        font-size: 18px;
-      }
-      
-      .face-btn {
-        width: 48px;
-        height: 48px;
-        font-size: 24px;
-      }
-      
-      .diff-btn {
-        padding: 8px 14px;
-        font-size: 13px;
-      }
+      animation: winShake 0.5s ease;
     }
 
     @media (max-width: 480px) {
+      body {
+        padding: 16px 12px;
+      }
+
       :root {
-        --cell-size: 28px;
+        --cell-size: 30px;
       }
-      
-      .header {
-        gap: 12px;
+
+      .game-title {
+        font-size: 24px;
+      }
+
+      .header-bar {
+        padding: 10px 12px;
+      }
+
+      .stat-box {
+        padding: 4px 10px;
+      }
+
+      .stat-icon {
+        font-size: 14px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+      }
+
+      .face-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+      }
+
+      .score-box {
+        padding: 4px 10px;
+      }
+
+      .score-value {
+        font-size: 16px;
+      }
+
+      .mode-btn,
+      .diff-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .leaderboard-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
-    .settings-container {
-      width: 100%;
-      max-width: 500px;
-    }
+    @media (max-width: 380px) {
+      :root {
+        --cell-size: 26px;
+      }
 
-    .settings-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+      .score-display {
+        gap: 8px;
+      }
 
-    .settings-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--color-7);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .settings-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--block-base);
-      box-shadow: 
-        3px 3px 6px var(--block-shadow),
-        -2px -2px 4px var(--block-highlight);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-7);
-      transition: all 0.15s ease;
-    }
-
-    .settings-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 
-        4px 4px 8px var(--block-shadow),
-        -3px -3px 6px var(--block-highlight);
-    }
-
-    .settings-panel {
-      background: var(--block-base);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 
-        3px 3px 6px var(--block-shadow),
-        -2px -2px 4px var(--block-highlight);
-    }
-
-    .setting-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--block-shadow);
-    }
-
-    .setting-item:last-child {
-      border-bottom: none;
-    }
-
-    .setting-label {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-7);
-    }
-
-    .setting-description {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 48px;
-      height: 26px;
-      background: var(--block-shadow);
-      border-radius: 13px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .toggle-switch.active {
-      background: var(--color-1);
-    }
-
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 20px;
-      height: 20px;
-      background: var(--block-highlight);
-      border-radius: 50%;
-      box-shadow: 0 2px 4px var(--block-dark);
-      transition: transform 0.2s ease;
-    }
-
-    .toggle-switch.active::after {
-      transform: translateX(22px);
-    }
-
-    .mode-selector {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--block-base);
-      box-shadow: 
-        3px 3px 6px var(--block-shadow),
-        -2px -2px 4px var(--block-highlight);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-      transition: all 0.15s ease;
-    }
-
-    .mode-btn:hover {
-      color: var(--color-7);
-    }
-
-    .mode-btn.active {
-      color: var(--color-1);
-      box-shadow: 
-        inset 2px 2px 4px var(--block-shadow),
-        inset -2px -2px 4px var(--block-highlight);
-    }
-
-    .score-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      width: 100%;
-      max-width: 500px;
-      padding: 0 4px;
-    }
-
-    .score-panel {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--block-base);
-      padding: 10px 16px;
-      border-radius: 8px;
-      box-shadow: 
-        inset 2px 2px 4px var(--block-highlight),
-        inset -2px -2px 4px var(--block-shadow);
-    }
-
-    .score-icon {
-      font-size: 18px;
-    }
-
-    .score-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--color-1);
-      min-width: 80px;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .combo-panel {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--block-base);
-      padding: 10px 16px;
-      border-radius: 8px;
-      box-shadow: 
-        inset 2px 2px 4px var(--block-highlight),
-        inset -2px -2px 4px var(--block-shadow);
-    }
-
-    .combo-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--color-3);
-      min-width: 50px;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .combo-value.active {
-      animation: comboPop 0.2s ease;
-    }
-
-    @keyframes comboPop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
+      .score-box {
+        padding: 4px 8px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
+  <div class="game-wrapper">
+    <header class="game-header">
+      <h1 class="game-title">💣 扫雷</h1>
+      <p class="game-subtitle">经典与创新的完美结合</p>
+    </header>
+
     <div class="mode-selector">
-      <button class="mode-btn active" data-mode="classic">经典模式</button>
-      <button class="mode-btn" data-mode="score">得分模式</button>
+      <button class="mode-btn active" data-mode="classic">
+        <span class="mode-icon">🎯</span>
+        <span>经典模式</span>
+      </button>
+      <button class="mode-btn" data-mode="score">
+        <span class="mode-icon">🏆</span>
+        <span>得分模式</span>
+      </button>
     </div>
-    
-    <div class="header">
-      <div class="stat-box" id="classic-header-left">
-        <span class="stat-icon">💣</span>
-        <span class="stat-value" id="mines-count">10</span>
-      </div>
-      <button class="face-btn" id="face-btn">😊</button>
-      <div class="stat-box" id="classic-header-right">
-        <span class="stat-icon">⏱</span>
-        <span class="stat-value" id="timer">0</span>
-      </div>
-    </div>
-    
-    <div class="score-header" id="score-header" style="display: none;">
+
+    <div class="header-bar">
       <div class="stat-box">
         <span class="stat-icon">💣</span>
-        <span class="stat-value" id="score-mines-count">10</span>
+        <span class="stat-value" id="mines-count">010</span>
       </div>
-      <button class="face-btn" id="score-face-btn">😊</button>
-      <div class="score-panel">
-        <span class="score-icon">🌟</span>
-        <span class="score-value" id="score">0</span>
-      </div>
-      <div class="combo-panel">
-        <span class="score-icon">🔥</span>
-        <span class="combo-value" id="combo">0</span>
+      <button class="face-btn" id="face-btn">😊</button>
+      <div class="stat-box">
+        <span class="stat-icon">⏱</span>
+        <span class="stat-value" id="timer">000</span>
       </div>
     </div>
-    
+
+    <div class="score-display" id="score-display" style="display: none;">
+      <div class="score-box">
+        <span class="score-label">得分</span>
+        <span class="score-value" id="score">0</span>
+      </div>
+      <div class="score-box">
+        <span class="score-label">连击</span>
+        <span class="score-value" id="combo">0</span>
+      </div>
+    </div>
+
     <div class="grid-container">
       <div class="grid" id="grid"></div>
     </div>
-    
+
     <div class="difficulty-selector">
-      <button class="diff-btn active" data-level="beginner">初级</button>
-      <button class="diff-btn" data-level="intermediate">中级</button>
-      <button class="diff-btn" data-level="expert">高级</button>
+      <button class="diff-btn active" data-level="beginner">
+        <span class="diff-icon">🌱</span>
+        <span>初级</span>
+      </button>
+      <button class="diff-btn" data-level="intermediate">
+        <span class="diff-icon">🌿</span>
+        <span>中级</span>
+      </button>
+      <button class="diff-btn" data-level="expert">
+        <span class="diff-icon">🌳</span>
+        <span>高级</span>
+      </button>
     </div>
-    
-    <div class="settings-container">
-      <div class="settings-header">
-        <div class="settings-title">
+
+    <div class="settings-section">
+      <button class="settings-toggle" id="settings-toggle">
+        <div class="settings-toggle-left">
           <span>⚙️</span>
           <span>设置</span>
         </div>
-      </div>
-      <div class="settings-panel">
+        <span class="toggle-arrow">▼</span>
+      </button>
+      <div class="settings-panel" id="settings-panel">
         <div class="setting-item">
-          <div>
-            <div class="setting-label">插旗自动翻开</div>
-            <div class="setting-description">当周围旗帜数等于数字时，自动翻开未标记的格子</div>
+          <div class="setting-info">
+            <span class="setting-label">插旗自动翻开</span>
+            <span class="setting-desc">当周围旗帜数等于数字时，自动翻开未标记的格子</span>
           </div>
           <div class="toggle-switch active" id="auto-reveal-toggle"></div>
         </div>
       </div>
     </div>
-    
-    <div class="leaderboard-container">
+
+    <div class="leaderboard-section">
       <div class="leaderboard-header">
         <div class="leaderboard-title">
           <span>🏆</span>
@@ -783,16 +863,25 @@
           <button class="leaderboard-tab" data-tab="expert">高级</button>
         </div>
       </div>
-      <div class="leaderboard" id="leaderboard">
+      <div class="leaderboard">
         <ul class="leaderboard-list" id="leaderboard-list"></ul>
       </div>
     </div>
+
+    <footer class="game-footer">
+      <p>🎮 点击笑脸重新开始 · 右键插旗</p>
+    </footer>
   </div>
 
   <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
   <div id="new-record-modal" class="new-record-modal" style="display: none;">
-    <div class="new-record-title">🎉 新纪录！</div>
-    <div class="new-record-time" id="new-record-time">0</div>
+    <div class="modal-header">
+      <span class="modal-icon">🎉</span>
+      <h3 class="new-record-title">新纪录！</h3>
+    </div>
+    <div class="new-record-score">
+      <span class="score-number" id="new-record-time">0</span>
+    </div>
     <input type="text" class="new-record-input" id="player-name" placeholder="输入你的名字" maxlength="10">
     <div class="new-record-buttons">
       <button class="new-record-btn cancel" id="cancel-btn">取消</button>
@@ -827,11 +916,9 @@
     let leaderboards = {};
     let autoRevealOnFlag = true;
 
-    // 得分模式变量
     let score = 0;
     let combo = 0;
     let comboTimer = null;
-    let gameTimeLeft = 60;
     let gameTimerInterval = null;
     let scoreLeaderboards = {};
 
@@ -852,12 +939,9 @@
     const modeBtns = document.querySelectorAll('.mode-btn');
     const scoreEl = document.getElementById('score');
     const comboEl = document.getElementById('combo');
-    const scoreMinesCountEl = document.getElementById('score-mines-count');
-    const scoreFaceBtn = document.getElementById('score-face-btn');
-    const classicHeaderEl = document.querySelector('.header');
-    const scoreHeaderEl = document.getElementById('score-header');
-    const classicHeaderLeft = document.getElementById('classic-header-left');
-    const classicHeaderRight = document.getElementById('classic-header-right');
+    const scoreDisplayEl = document.getElementById('score-display');
+    const settingsToggle = document.getElementById('settings-toggle');
+    const settingsPanel = document.getElementById('settings-panel');
 
     function loadSettings() {
       const saved = localStorage.getItem('minesweeper_settings');
@@ -1025,7 +1109,6 @@
       } else {
         newRecordTimeEl.textContent = timeOrScore;
       }
-      newRecordTimeEl.previousElementSibling.textContent = '🎉 新纪录！';
       playerNameInput.value = '';
       modalOverlay.style.display = 'block';
       newRecordModal.style.display = 'block';
@@ -1045,13 +1128,11 @@
       });
       
       if (mode === 'classic') {
-        classicHeaderEl.style.display = 'flex';
-        scoreHeaderEl.style.display = 'none';
-        leaderboardListEl.style.display = 'block';
+        document.querySelector('.header-bar').style.display = 'flex';
+        scoreDisplayEl.style.display = 'none';
       } else {
-        classicHeaderEl.style.display = 'none';
-        scoreHeaderEl.style.display = 'flex';
-        leaderboardListEl.style.display = 'block';
+        document.querySelector('.header-bar').style.display = 'none';
+        scoreDisplayEl.style.display = 'flex';
       }
       
       renderLeaderboard(currentLevel);
@@ -1064,8 +1145,8 @@
       flagCount = 0;
       scoreEl.textContent = score;
       comboEl.textContent = combo;
-      scoreMinesCountEl.textContent = totalMines;
-      scoreFaceBtn.textContent = FACES.playing;
+      minesCountEl.textContent = String(totalMines).padStart(3, '0');
+      faceBtn.textContent = FACES.playing;
       
       clearInterval(gameTimerInterval);
       gameTimerInterval = null;
@@ -1100,18 +1181,9 @@
       gameTimerInterval = null;
       comboTimer = null;
       
-      if (won) {
-        if (currentMode === 'classic') {
-          faceBtn.textContent = FACES.win;
-        } else {
-          scoreFaceBtn.textContent = FACES.win;
-        }
-      } else {
-        if (currentMode === 'classic') {
-          faceBtn.textContent = FACES.lose;
-        } else {
-          scoreFaceBtn.textContent = FACES.lose;
-        }
+      faceBtn.textContent = won ? FACES.win : FACES.lose;
+      
+      if (!won) {
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const data = grid[r][c];
@@ -1148,6 +1220,10 @@
       
       if (currentMode === 'score') {
         initScoreMode();
+      } else {
+        minesCountEl.textContent = String(totalMines).padStart(3, '0');
+        timerEl.textContent = '000';
+        faceBtn.textContent = FACES.playing;
       }
       
       for (let r = 0; r < rows; r++) {
@@ -1162,9 +1238,6 @@
         }
       }
       
-      updateMinesDisplay();
-      timerEl.textContent = '0';
-      faceBtn.textContent = FACES.playing;
       renderGrid();
     }
 
@@ -1206,8 +1279,8 @@
           if (dr === 0 && dc === 0) continue;
           const nr = row + dr;
           const nc = col + dc;
-          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc].isMine) {
-            count++;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+            if (grid[nr][nc].isMine) count++;
           }
         }
       }
@@ -1484,10 +1557,7 @@
 
     function updateMinesDisplay() {
       const remaining = totalMines - flagCount;
-      minesCountEl.textContent = remaining < 0 ? `-${Math.abs(remaining)}` : remaining;
-      if (currentMode === 'score') {
-        scoreMinesCountEl.textContent = remaining < 0 ? `-${Math.abs(remaining)}` : remaining;
-      }
+      minesCountEl.textContent = String(Math.abs(remaining)).padStart(3, '0');
     }
 
     function renderAllCells() {
@@ -1501,7 +1571,7 @@
     function startTimer() {
       timerInterval = setInterval(() => {
         timer++;
-        timerEl.textContent = timer;
+        timerEl.textContent = String(timer).padStart(3, '0');
         if (timer >= 999) {
           clearInterval(timerInterval);
         }
@@ -1517,6 +1587,18 @@
       }
     }
 
+    function checkWinByFlags() {
+      let correctFlags = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c].isFlagged && grid[r][c].isMine) {
+            correctFlags++;
+          }
+        }
+      }
+      return correctFlags === totalMines;
+    }
+
     function gameOver(won) {
       gameState = 'over';
       clearInterval(timerInterval);
@@ -1524,7 +1606,7 @@
       if (won) {
         faceBtn.textContent = FACES.win;
         gridEl.classList.add('win');
-        setTimeout(() => gridEl.classList.remove('win'), 400);
+        setTimeout(() => gridEl.classList.remove('win'), 500);
         
         if (checkNewRecord(currentLevel, timer)) {
           setTimeout(() => showNewRecordModal(timer), 500);
@@ -1553,12 +1635,6 @@
       }
     });
 
-    scoreFaceBtn.addEventListener('click', () => {
-      if (currentMode === 'score') {
-        initGame(currentLevel);
-      }
-    });
-
     diffBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         diffBtns.forEach(b => b.classList.remove('active'));
@@ -1581,6 +1657,11 @@
       btn.addEventListener('click', () => {
         switchMode(btn.dataset.mode);
       });
+    });
+
+    settingsToggle.addEventListener('click', () => {
+      settingsToggle.classList.toggle('active');
+      settingsPanel.classList.toggle('show');
     });
 
     submitBtn.addEventListener('click', () => {

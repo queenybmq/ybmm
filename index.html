@@ -23,6 +23,9 @@
       --mine: #2D2D2D;
       --flag: #D66B6B;
       --cell-size: 36px;
+      --gold: #D4AF37;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
     }
 
     * {
@@ -247,6 +250,210 @@
       touch-action: manipulation;
     }
 
+    .leaderboard-container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .leaderboard-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .leaderboard-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--block-base);
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .leaderboard-tab {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .leaderboard-tab.active {
+      background: var(--block-highlight);
+      color: var(--color-7);
+      box-shadow: 0 2px 4px var(--block-shadow);
+    }
+
+    .leaderboard {
+      background: var(--block-base);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--block-highlight);
+      border-radius: 8px;
+      box-shadow: inset 0 1px 2px var(--block-shadow);
+    }
+
+    .leaderboard-rank {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .leaderboard-rank.gold { color: var(--gold); }
+    .leaderboard-rank.silver { color: var(--silver); }
+    .leaderboard-rank.bronze { color: var(--bronze); }
+
+    .leaderboard-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-7);
+    }
+
+    .leaderboard-time {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leaderboard-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .new-record-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--block-highlight);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      min-width: 280px;
+    }
+
+    .new-record-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-7);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .new-record-time {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-3);
+      text-align: center;
+      margin-bottom: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .new-record-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--block-shadow);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-7);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s ease;
+      background: var(--bg);
+    }
+
+    .new-record-input:focus {
+      border-color: var(--color-1);
+    }
+
+    .new-record-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .new-record-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .new-record-btn.submit {
+      background: var(--color-1);
+      color: white;
+    }
+
+    .new-record-btn.submit:hover {
+      background: #4a7ab0;
+    }
+
+    .new-record-btn.cancel {
+      background: var(--block-shadow);
+      color: var(--color-7);
+    }
+
+    .new-record-btn.cancel:hover {
+      background: var(--block-dark);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 999;
+    }
+
     @keyframes winShake {
       0%, 100% { transform: translateX(0); }
       20% { transform: translateX(-3px); }
@@ -318,13 +525,41 @@
       <button class="diff-btn" data-level="intermediate">中级</button>
       <button class="diff-btn" data-level="expert">高级</button>
     </div>
+    
+    <div class="leaderboard-container">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title">
+          <span>🏆</span>
+          <span>排行榜</span>
+        </div>
+        <div class="leaderboard-tabs">
+          <button class="leaderboard-tab active" data-tab="beginner">初级</button>
+          <button class="leaderboard-tab" data-tab="intermediate">中级</button>
+          <button class="leaderboard-tab" data-tab="expert">高级</button>
+        </div>
+      </div>
+      <div class="leaderboard" id="leaderboard">
+        <ul class="leaderboard-list" id="leaderboard-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+  <div id="new-record-modal" class="new-record-modal" style="display: none;">
+    <div class="new-record-title">🎉 新纪录！</div>
+    <div class="new-record-time" id="new-record-time">0</div>
+    <input type="text" class="new-record-input" id="player-name" placeholder="输入你的名字" maxlength="10">
+    <div class="new-record-buttons">
+      <button class="new-record-btn cancel" id="cancel-btn">取消</button>
+      <button class="new-record-btn submit" id="submit-btn">保存</button>
+    </div>
   </div>
 
   <script>
     const DIFFICULTIES = {
-      beginner: { rows: 9, cols: 9, mines: 10 },
-      intermediate: { rows: 16, cols: 16, mines: 40 },
-      expert: { rows: 16, cols: 30, mines: 99 }
+      beginner: { rows: 9, cols: 9, mines: 10, name: '初级' },
+      intermediate: { rows: 16, cols: 16, mines: 40, name: '中级' },
+      expert: { rows: 16, cols: 30, mines: 99, name: '高级' }
     };
 
     const FACES = {
@@ -342,14 +577,129 @@
     let revealedCount = 0;
     let timer = 0;
     let timerInterval = null;
+    let currentLevel = 'beginner';
+    let leaderboards = {};
 
     const gridEl = document.getElementById('grid');
     const minesCountEl = document.getElementById('mines-count');
     const timerEl = document.getElementById('timer');
     const faceBtn = document.getElementById('face-btn');
     const diffBtns = document.querySelectorAll('.diff-btn');
+    const leaderboardTabs = document.querySelectorAll('.leaderboard-tab');
+    const leaderboardListEl = document.getElementById('leaderboard-list');
+    const newRecordModal = document.getElementById('new-record-modal');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const newRecordTimeEl = document.getElementById('new-record-time');
+    const playerNameInput = document.getElementById('player-name');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    function initLeaderboards() {
+      const saved = localStorage.getItem('minesweeper_leaderboards');
+      if (saved) {
+        leaderboards = JSON.parse(saved);
+      } else {
+        leaderboards = {
+          beginner: [
+            { name: '玩家', time: 45 },
+            { name: '高手', time: 58 },
+            { name: '大师', time: 72 },
+            { name: '新手', time: 90 },
+            { name: '小白', time: 120 }
+          ],
+          intermediate: [
+            { name: '高手', time: 120 },
+            { name: '大师', time: 150 },
+            { name: '玩家', time: 180 }
+          ],
+          expert: [
+            { name: '大师', time: 240 },
+            { name: '高手', time: 300 }
+          ]
+        };
+      }
+      renderLeaderboard('beginner');
+    }
+
+    function saveLeaderboards() {
+      localStorage.setItem('minesweeper_leaderboards', JSON.stringify(leaderboards));
+    }
+
+    function renderLeaderboard(level) {
+      const records = leaderboards[level] || [];
+      leaderboardListEl.innerHTML = '';
+      
+      if (records.length === 0) {
+        leaderboardListEl.innerHTML = '<li class="leaderboard-empty">暂无记录</li>';
+        return;
+      }
+      
+      records.sort((a, b) => a.time - b.time);
+      records.slice(0, 10).forEach((record, index) => {
+        const li = document.createElement('li');
+        li.className = 'leaderboard-item';
+        
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'leaderboard-rank';
+        if (index === 0) rankSpan.classList.add('gold');
+        else if (index === 1) rankSpan.classList.add('silver');
+        else if (index === 2) rankSpan.classList.add('bronze');
+        rankSpan.textContent = index + 1;
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'leaderboard-name';
+        nameSpan.textContent = record.name;
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'leaderboard-time';
+        timeSpan.textContent = formatTime(record.time);
+        
+        li.appendChild(rankSpan);
+        li.appendChild(nameSpan);
+        li.appendChild(timeSpan);
+        leaderboardListEl.appendChild(li);
+      });
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function checkNewRecord(level, time) {
+      const records = leaderboards[level] || [];
+      if (records.length < 10) return true;
+      const worstTime = Math.max(...records.map(r => r.time));
+      return time < worstTime;
+    }
+
+    function addRecord(level, name, time) {
+      if (!leaderboards[level]) {
+        leaderboards[level] = [];
+      }
+      leaderboards[level].push({ name, time });
+      leaderboards[level].sort((a, b) => a.time - b.time);
+      leaderboards[level] = leaderboards[level].slice(0, 10);
+      saveLeaderboards();
+      renderLeaderboard(level);
+    }
+
+    function showNewRecordModal(time) {
+      newRecordTimeEl.textContent = formatTime(time);
+      playerNameInput.value = '';
+      modalOverlay.style.display = 'block';
+      newRecordModal.style.display = 'block';
+      playerNameInput.focus();
+    }
+
+    function hideNewRecordModal() {
+      modalOverlay.style.display = 'none';
+      newRecordModal.style.display = 'none';
+    }
 
     function initGame(level = 'beginner') {
+      currentLevel = level;
       const config = DIFFICULTIES[level];
       rows = config.rows;
       cols = config.cols;
@@ -695,6 +1045,10 @@
         faceBtn.textContent = FACES.win;
         gridEl.classList.add('win');
         setTimeout(() => gridEl.classList.remove('win'), 400);
+        
+        if (checkNewRecord(currentLevel, timer)) {
+          setTimeout(() => showNewRecordModal(timer), 500);
+        }
       } else {
         faceBtn.textContent = FACES.lose;
         
@@ -714,7 +1068,7 @@
     }
 
     faceBtn.addEventListener('click', () => {
-      initGame();
+      initGame(currentLevel);
     });
 
     diffBtns.forEach(btn => {
@@ -725,6 +1079,31 @@
       });
     });
 
+    leaderboardTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        leaderboardTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderLeaderboard(tab.dataset.tab);
+      });
+    });
+
+    submitBtn.addEventListener('click', () => {
+      const name = playerNameInput.value.trim() || '匿名';
+      addRecord(currentLevel, name, timer);
+      hideNewRecordModal();
+    });
+
+    cancelBtn.addEventListener('click', hideNewRecordModal);
+
+    modalOverlay.addEventListener('click', hideNewRecordModal);
+
+    playerNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        submitBtn.click();
+      }
+    });
+
+    initLeaderboards();
     initGame();
   </script>
 </body>

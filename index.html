@@ -643,7 +643,8 @@
 
     .score-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 32px;
       align-items: center;
       margin-bottom: 16px;
       width: 100%;
@@ -706,37 +707,6 @@
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
-
-    .game-timer-panel {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--block-base);
-      padding: 10px 16px;
-      border-radius: 8px;
-      box-shadow: 
-        inset 2px 2px 4px var(--block-highlight),
-        inset -2px -2px 4px var(--block-shadow);
-    }
-
-    .game-timer-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--color-2);
-      min-width: 60px;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .game-timer-value.warning {
-      color: var(--color-3);
-      animation: timerPulse 0.5s ease infinite;
-    }
-
-    @keyframes timerPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
   </style>
 </head>
 <body>
@@ -759,10 +729,6 @@
     </div>
     
     <div class="score-header" id="score-header" style="display: none;">
-      <div class="game-timer-panel">
-        <span class="score-icon">⏰</span>
-        <span class="game-timer-value" id="game-timer">60</span>
-      </div>
       <div class="score-panel">
         <span class="score-icon">🌟</span>
         <span class="score-value" id="score">0</span>
@@ -1090,11 +1056,8 @@
     function initScoreMode() {
       score = 0;
       combo = 0;
-      gameTimeLeft = 60;
       scoreEl.textContent = score;
       comboEl.textContent = combo;
-      gameTimerEl.textContent = gameTimeLeft;
-      gameTimerEl.classList.remove('warning');
       
       clearInterval(gameTimerInterval);
       gameTimerInterval = null;
@@ -1103,26 +1066,11 @@
       comboTimer = null;
     }
 
-    function startGameTimer() {
-      gameTimerInterval = setInterval(() => {
-        gameTimeLeft--;
-        gameTimerEl.textContent = gameTimeLeft;
-        
-        if (gameTimeLeft <= 10) {
-          gameTimerEl.classList.add('warning');
-        }
-        
-        if (gameTimeLeft <= 0) {
-          endScoreMode();
-        }
-      }, 1000);
-    }
-
     function updateCombo() {
       combo++;
       comboEl.textContent = combo;
       comboEl.classList.remove('active');
-      void comboEl.offsetWidth; // 触发重排
+      void comboEl.offsetWidth;
       comboEl.classList.add('active');
       
       clearTimeout(comboTimer);
@@ -1137,22 +1085,32 @@
       return Math.floor(baseScore * comboMultiplier);
     }
 
-    function endScoreMode() {
+    function endScoreMode(won) {
       gameState = 'over';
       clearInterval(gameTimerInterval);
       clearTimeout(comboTimer);
       gameTimerInterval = null;
       comboTimer = null;
       
-      faceBtn.textContent = FACES.win;
+      if (won) {
+        faceBtn.textContent = FACES.win;
+      } else {
+        faceBtn.textContent = FACES.lose;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const data = grid[r][c];
+            if (data.isMine && !data.isRevealed) {
+              data.isRevealed = true;
+            }
+          }
+        }
+      }
       
       if (checkNewRecord(currentLevel, score)) {
         setTimeout(() => showNewRecordModal(score), 500);
       }
       
-      document.querySelectorAll('.cell').forEach(cell => {
-        cell.classList.add('game-over');
-      });
+      renderAllCells();
     }
 
     function initGame(level = 'beginner') {
@@ -1353,8 +1311,6 @@
         generateMines(row, col);
         if (currentMode === 'classic') {
           startTimer();
-        } else {
-          startGameTimer();
         }
       }
       
@@ -1364,11 +1320,7 @@
           data.hit = true;
           gameOver(false);
         } else {
-          // 得分模式下踩雷不结束，但有惩罚
-          combo = 0;
-          comboEl.textContent = combo;
-          clearTimeout(comboTimer);
-          comboTimer = null;
+          endScoreMode(false);
         }
         return;
       }
@@ -1376,6 +1328,12 @@
       floodReveal(row, col);
       if (currentMode === 'classic') {
         checkWin();
+      } else {
+        const totalCells = rows * cols;
+        const safeCells = totalCells - totalMines;
+        if (revealedCount === safeCells) {
+          endScoreMode(true);
+        }
       }
     }
 
@@ -1488,10 +1446,8 @@
                     gameOver(false);
                     return;
                   } else {
-                    combo = 0;
-                    comboEl.textContent = combo;
-                    clearTimeout(comboTimer);
-                    comboTimer = null;
+                    endScoreMode(false);
+                    return;
                   }
                 } else {
                   floodReveal(nr, nc);

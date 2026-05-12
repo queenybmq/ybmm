@@ -500,6 +500,113 @@
         gap: 12px;
       }
     }
+
+    .settings-container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .settings-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--block-base);
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-7);
+      transition: all 0.15s ease;
+    }
+
+    .settings-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 
+        4px 4px 8px var(--block-shadow),
+        -3px -3px 6px var(--block-highlight);
+    }
+
+    .settings-panel {
+      background: var(--block-base);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--block-shadow);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-7);
+    }
+
+    .setting-description {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: var(--block-shadow);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--color-1);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--block-highlight);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px var(--block-dark);
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(22px);
+    }
   </style>
 </head>
 <body>
@@ -524,6 +631,24 @@
       <button class="diff-btn active" data-level="beginner">初级</button>
       <button class="diff-btn" data-level="intermediate">中级</button>
       <button class="diff-btn" data-level="expert">高级</button>
+    </div>
+    
+    <div class="settings-container">
+      <div class="settings-header">
+        <div class="settings-title">
+          <span>⚙️</span>
+          <span>设置</span>
+        </div>
+      </div>
+      <div class="settings-panel">
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">插旗自动翻开</div>
+            <div class="setting-description">当周围旗帜数等于数字时，自动翻开未标记的格子</div>
+          </div>
+          <div class="toggle-switch active" id="auto-reveal-toggle"></div>
+        </div>
+      </div>
     </div>
     
     <div class="leaderboard-container">
@@ -579,6 +704,7 @@
     let timerInterval = null;
     let currentLevel = 'beginner';
     let leaderboards = {};
+    let autoRevealOnFlag = true;
 
     const gridEl = document.getElementById('grid');
     const minesCountEl = document.getElementById('mines-count');
@@ -593,6 +719,28 @@
     const playerNameInput = document.getElementById('player-name');
     const submitBtn = document.getElementById('submit-btn');
     const cancelBtn = document.getElementById('cancel-btn');
+    const autoRevealToggle = document.getElementById('auto-reveal-toggle');
+
+    function loadSettings() {
+      const saved = localStorage.getItem('minesweeper_settings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        autoRevealOnFlag = settings.autoRevealOnFlag !== undefined ? settings.autoRevealOnFlag : true;
+      }
+      updateAutoRevealToggle();
+    }
+
+    function saveSettings() {
+      localStorage.setItem('minesweeper_settings', JSON.stringify({
+        autoRevealOnFlag
+      }));
+    }
+
+    function updateAutoRevealToggle() {
+      if (autoRevealToggle) {
+        autoRevealToggle.classList.toggle('active', autoRevealOnFlag);
+      }
+    }
 
     function initLeaderboards() {
       const saved = localStorage.getItem('minesweeper_leaderboards');
@@ -949,14 +1097,16 @@
       updateCellDisplay(getCellElement(row, col), row, col);
       updateMinesDisplay();
       
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          const nr = row + dr;
-          const nc = col + dc;
-          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-            const neighbor = grid[nr][nc];
-            if (neighbor.isRevealed && neighbor.adjacentMines > 0) {
-              autoReveal(nr, nc);
+      if (autoRevealOnFlag) {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = row + dr;
+            const nc = col + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+              const neighbor = grid[nr][nc];
+              if (neighbor.isRevealed && neighbor.adjacentMines > 0) {
+                autoReveal(nr, nc);
+              }
             }
           }
         }
@@ -1105,6 +1255,13 @@
       }
     });
 
+    autoRevealToggle.addEventListener('click', () => {
+      autoRevealOnFlag = !autoRevealOnFlag;
+      updateAutoRevealToggle();
+      saveSettings();
+    });
+
+    loadSettings();
     initLeaderboards();
     initGame();
   </script>

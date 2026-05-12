@@ -526,6 +526,13 @@
       if (gameState !== 'playing') return;
       
       const data = grid[row][col];
+      
+      if (data.isRevealed && data.adjacentMines > 0) {
+        autoReveal(row, col);
+        checkWin();
+        return;
+      }
+      
       if (data.isRevealed || data.isFlagged) return;
       
       if (firstClick) {
@@ -592,10 +599,17 @@
       updateCellDisplay(getCellElement(row, col), row, col);
       updateMinesDisplay();
       
-      const cell = getCellElement(row, col);
-      const adjMines = data.adjacentMines;
-      if (data.isFlagged && adjMines > 0) {
-        autoReveal(row, col);
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = row + dr;
+          const nc = col + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+            const neighbor = grid[nr][nc];
+            if (neighbor.isRevealed && neighbor.adjacentMines > 0) {
+              autoReveal(nr, nc);
+            }
+          }
+        }
       }
     }
 

@@ -23,7 +23,7 @@
       --color-8: #888888;
       --mine: #2d2d2d;
       --flag: #d66b6b;
-      --cell-size: 36px;
+      --cell-size: min(36px, calc((100vw - 48px) / 30));
       --gold: #d4af37;
       --silver: #c0c0c0;
       --bronze: #cd7f32;
@@ -41,17 +41,18 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 24px 16px;
+      padding: 16px 12px;
       user-select: none;
       -webkit-user-select: none;
+      overflow-x: hidden;
     }
 
     .game-container {
       width: 100%;
-      max-width: 560px;
+      max-width: min(560px, 100vw - 24px);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       align-items: center;
     }
 
@@ -229,33 +230,26 @@
       100% { transform: scale(1); }
     }
 
-    .grid-container {
-      display: inline-block;
-      background: var(--block-shadow);
-      padding: 8px;
-      border-radius: 12px;
-      box-shadow: 
-        6px 6px 12px var(--block-dark),
-        -3px -3px 8px var(--block-highlight);
-    }
-
     .grid-wrapper {
       display: flex;
       justify-content: center;
       width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .grid-container {
       background: var(--block-shadow);
-      padding: 8px;
-      border-radius: 12px;
+      padding: 6px;
+      border-radius: 10px;
       box-shadow: 
         6px 6px 12px var(--block-dark),
         -3px -3px 8px var(--block-highlight);
+      max-width: 100%;
     }
 
     .grid {
-      display: inline-grid;
+      display: grid;
       gap: 2px;
     }
 
@@ -720,25 +714,49 @@
       animation: winShake 0.5s ease;
     }
 
-    @media (max-width: 480px) {
-      body {
-        padding: 16px 12px;
-      }
-
+    @media (max-width: 768px) {
       :root {
-        --cell-size: 30px;
+        --cell-size: min(32px, calc((100vw - 40px) / 30));
       }
 
       .game-title {
-        font-size: 24px;
+        font-size: 26px;
       }
 
       .header-bar {
+        padding: 10px 14px;
+      }
+
+      .mode-btn,
+      .diff-btn {
         padding: 10px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px 8px;
+      }
+
+      :root {
+        --cell-size: min(28px, calc((100vw - 32px) / 30));
+      }
+
+      .game-title {
+        font-size: 22px;
+      }
+
+      .game-subtitle {
+        font-size: 11px;
+      }
+
+      .header-bar {
+        padding: 8px 10px;
       }
 
       .stat-box {
-        padding: 4px 10px;
+        padding: 4px 8px;
       }
 
       .stat-icon {
@@ -746,13 +764,14 @@
       }
 
       .stat-value {
-        font-size: 16px;
+        font-size: 15px;
+        min-width: 28px;
       }
 
       .face-btn {
-        width: 42px;
-        height: 42px;
-        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
       }
 
       .score-box {
@@ -760,24 +779,33 @@
       }
 
       .score-value {
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .mode-btn,
       .diff-btn {
-        padding: 8px 10px;
-        font-size: 12px;
+        padding: 8px 8px;
+        font-size: 11px;
+      }
+
+      .mode-icon,
+      .diff-icon {
+        font-size: 13px;
       }
 
       .leaderboard-header {
         flex-direction: column;
         align-items: flex-start;
       }
+
+      .grid-container {
+        padding: 6px;
+      }
     }
 
-    @media (max-width: 380px) {
+    @media (max-width: 360px) {
       :root {
-        --cell-size: 26px;
+        --cell-size: min(24px, calc((100vw - 28px) / 30));
       }
 
       .score-display {
@@ -786,6 +814,12 @@
 
       .score-box {
         padding: 4px 8px;
+      }
+
+      .mode-btn,
+      .diff-btn {
+        padding: 6px 6px;
+        font-size: 10px;
       }
     }
   </style>

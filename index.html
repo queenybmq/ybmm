@@ -607,19 +607,169 @@
     .toggle-switch.active::after {
       transform: translateX(22px);
     }
+
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--block-base);
+      box-shadow: 
+        3px 3px 6px var(--block-shadow),
+        -2px -2px 4px var(--block-highlight);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .mode-btn:hover {
+      color: var(--color-7);
+    }
+
+    .mode-btn.active {
+      color: var(--color-1);
+      box-shadow: 
+        inset 2px 2px 4px var(--block-shadow),
+        inset -2px -2px 4px var(--block-highlight);
+    }
+
+    .score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      width: 100%;
+      max-width: 500px;
+      padding: 0 4px;
+    }
+
+    .score-panel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--block-base);
+      padding: 10px 16px;
+      border-radius: 8px;
+      box-shadow: 
+        inset 2px 2px 4px var(--block-highlight),
+        inset -2px -2px 4px var(--block-shadow);
+    }
+
+    .score-icon {
+      font-size: 18px;
+    }
+
+    .score-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-1);
+      min-width: 80px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .combo-panel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--block-base);
+      padding: 10px 16px;
+      border-radius: 8px;
+      box-shadow: 
+        inset 2px 2px 4px var(--block-highlight),
+        inset -2px -2px 4px var(--block-shadow);
+    }
+
+    .combo-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-3);
+      min-width: 50px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .combo-value.active {
+      animation: comboPop 0.2s ease;
+    }
+
+    @keyframes comboPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .game-timer-panel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--block-base);
+      padding: 10px 16px;
+      border-radius: 8px;
+      box-shadow: 
+        inset 2px 2px 4px var(--block-highlight),
+        inset -2px -2px 4px var(--block-shadow);
+    }
+
+    .game-timer-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-2);
+      min-width: 60px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .game-timer-value.warning {
+      color: var(--color-3);
+      animation: timerPulse 0.5s ease infinite;
+    }
+
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
   <div class="game-container">
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="classic">经典模式</button>
+      <button class="mode-btn" data-mode="score">得分模式</button>
+    </div>
+    
     <div class="header">
-      <div class="stat-box">
+      <div class="stat-box" id="classic-header-left">
         <span class="stat-icon">💣</span>
         <span class="stat-value" id="mines-count">10</span>
       </div>
       <button class="face-btn" id="face-btn">😊</button>
-      <div class="stat-box">
+      <div class="stat-box" id="classic-header-right">
         <span class="stat-icon">⏱</span>
         <span class="stat-value" id="timer">0</span>
+      </div>
+    </div>
+    
+    <div class="score-header" id="score-header" style="display: none;">
+      <div class="game-timer-panel">
+        <span class="score-icon">⏰</span>
+        <span class="game-timer-value" id="game-timer">60</span>
+      </div>
+      <div class="score-panel">
+        <span class="score-icon">🌟</span>
+        <span class="score-value" id="score">0</span>
+      </div>
+      <div class="combo-panel">
+        <span class="score-icon">🔥</span>
+        <span class="combo-value" id="combo">0</span>
       </div>
     </div>
     
@@ -703,8 +853,17 @@
     let timer = 0;
     let timerInterval = null;
     let currentLevel = 'beginner';
+    let currentMode = 'classic';
     let leaderboards = {};
     let autoRevealOnFlag = true;
+
+    // 得分模式变量
+    let score = 0;
+    let combo = 0;
+    let comboTimer = null;
+    let gameTimeLeft = 60;
+    let gameTimerInterval = null;
+    let scoreLeaderboards = {};
 
     const gridEl = document.getElementById('grid');
     const minesCountEl = document.getElementById('mines-count');
@@ -720,6 +879,14 @@
     const submitBtn = document.getElementById('submit-btn');
     const cancelBtn = document.getElementById('cancel-btn');
     const autoRevealToggle = document.getElementById('auto-reveal-toggle');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const scoreEl = document.getElementById('score');
+    const comboEl = document.getElementById('combo');
+    const gameTimerEl = document.getElementById('game-timer');
+    const classicHeaderEl = document.querySelector('.header');
+    const scoreHeaderEl = document.getElementById('score-header');
+    const classicHeaderLeft = document.getElementById('classic-header-left');
+    const classicHeaderRight = document.getElementById('classic-header-right');
 
     function loadSettings() {
       const saved = localStorage.getItem('minesweeper_settings');
@@ -766,6 +933,26 @@
           ]
         };
       }
+
+      const savedScore = localStorage.getItem('minesweeper_score_leaderboards');
+      if (savedScore) {
+        scoreLeaderboards = JSON.parse(savedScore);
+      } else {
+        scoreLeaderboards = {
+          beginner: [
+            { name: '得分王', score: 5000 },
+            { name: '高分玩家', score: 3500 },
+            { name: '新手', score: 2000 }
+          ],
+          intermediate: [
+            { name: '得分王', score: 8000 },
+            { name: '高分玩家', score: 6000 }
+          ],
+          expert: [
+            { name: '得分王', score: 12000 }
+          ]
+        };
+      }
       renderLeaderboard('beginner');
     }
 
@@ -773,8 +960,12 @@
       localStorage.setItem('minesweeper_leaderboards', JSON.stringify(leaderboards));
     }
 
+    function saveScoreLeaderboards() {
+      localStorage.setItem('minesweeper_score_leaderboards', JSON.stringify(scoreLeaderboards));
+    }
+
     function renderLeaderboard(level) {
-      const records = leaderboards[level] || [];
+      const records = currentMode === 'classic' ? (leaderboards[level] || []) : (scoreLeaderboards[level] || []);
       leaderboardListEl.innerHTML = '';
       
       if (records.length === 0) {
@@ -782,8 +973,11 @@
         return;
       }
       
-      records.sort((a, b) => a.time - b.time);
-      records.slice(0, 10).forEach((record, index) => {
+      const sortedRecords = currentMode === 'classic' 
+        ? [...records].sort((a, b) => a.time - b.time)
+        : [...records].sort((a, b) => b.score - a.score);
+      
+      sortedRecords.slice(0, 10).forEach((record, index) => {
         const li = document.createElement('li');
         li.className = 'leaderboard-item';
         
@@ -798,13 +992,17 @@
         nameSpan.className = 'leaderboard-name';
         nameSpan.textContent = record.name;
         
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'leaderboard-time';
-        timeSpan.textContent = formatTime(record.time);
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'leaderboard-time';
+        if (currentMode === 'classic') {
+          valueSpan.textContent = formatTime(record.time);
+        } else {
+          valueSpan.textContent = record.score;
+        }
         
         li.appendChild(rankSpan);
         li.appendChild(nameSpan);
-        li.appendChild(timeSpan);
+        li.appendChild(valueSpan);
         leaderboardListEl.appendChild(li);
       });
     }
@@ -815,26 +1013,48 @@
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    function checkNewRecord(level, time) {
-      const records = leaderboards[level] || [];
-      if (records.length < 10) return true;
-      const worstTime = Math.max(...records.map(r => r.time));
-      return time < worstTime;
+    function checkNewRecord(level, timeOrScore) {
+      if (currentMode === 'classic') {
+        const records = leaderboards[level] || [];
+        if (records.length < 10) return true;
+        const worstTime = Math.max(...records.map(r => r.time));
+        return timeOrScore < worstTime;
+      } else {
+        const records = scoreLeaderboards[level] || [];
+        if (records.length < 10) return true;
+        const worstScore = Math.min(...records.map(r => r.score));
+        return timeOrScore > worstScore;
+      }
     }
 
-    function addRecord(level, name, time) {
-      if (!leaderboards[level]) {
-        leaderboards[level] = [];
+    function addRecord(level, name, timeOrScore) {
+      if (currentMode === 'classic') {
+        if (!leaderboards[level]) {
+          leaderboards[level] = [];
+        }
+        leaderboards[level].push({ name, time: timeOrScore });
+        leaderboards[level].sort((a, b) => a.time - b.time);
+        leaderboards[level] = leaderboards[level].slice(0, 10);
+        saveLeaderboards();
+      } else {
+        if (!scoreLeaderboards[level]) {
+          scoreLeaderboards[level] = [];
+        }
+        scoreLeaderboards[level].push({ name, score: timeOrScore });
+        scoreLeaderboards[level].sort((a, b) => b.score - a.score);
+        scoreLeaderboards[level] = scoreLeaderboards[level].slice(0, 10);
+        saveScoreLeaderboards();
       }
-      leaderboards[level].push({ name, time });
-      leaderboards[level].sort((a, b) => a.time - b.time);
-      leaderboards[level] = leaderboards[level].slice(0, 10);
-      saveLeaderboards();
       renderLeaderboard(level);
     }
 
-    function showNewRecordModal(time) {
-      newRecordTimeEl.textContent = formatTime(time);
+    function showNewRecordModal(timeOrScore) {
+      if (currentMode === 'classic') {
+        newRecordTimeEl.textContent = formatTime(timeOrScore);
+      } else {
+        newRecordTimeEl.textContent = timeOrScore;
+      }
+      newRecordTimeEl.previousElementSibling.textContent = '🎉 新纪录！';
       playerNameInput.value = '';
       modalOverlay.style.display = 'block';
       newRecordModal.style.display = 'block';
@@ -844,6 +1064,95 @@
     function hideNewRecordModal() {
       modalOverlay.style.display = 'none';
       newRecordModal.style.display = 'none';
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      modeBtns.forEach(btn => btn.classList.remove('active'));
+      modeBtns.forEach(btn => {
+        if (btn.dataset.mode === mode) btn.classList.add('active');
+      });
+      
+      if (mode === 'classic') {
+        classicHeaderEl.style.display = 'flex';
+        scoreHeaderEl.style.display = 'none';
+        leaderboardListEl.style.display = 'block';
+      } else {
+        classicHeaderEl.style.display = 'none';
+        scoreHeaderEl.style.display = 'flex';
+        leaderboardListEl.style.display = 'block';
+      }
+      
+      renderLeaderboard(currentLevel);
+      initGame(currentLevel);
+    }
+
+    function initScoreMode() {
+      score = 0;
+      combo = 0;
+      gameTimeLeft = 60;
+      scoreEl.textContent = score;
+      comboEl.textContent = combo;
+      gameTimerEl.textContent = gameTimeLeft;
+      gameTimerEl.classList.remove('warning');
+      
+      clearInterval(gameTimerInterval);
+      gameTimerInterval = null;
+      
+      clearTimeout(comboTimer);
+      comboTimer = null;
+    }
+
+    function startGameTimer() {
+      gameTimerInterval = setInterval(() => {
+        gameTimeLeft--;
+        gameTimerEl.textContent = gameTimeLeft;
+        
+        if (gameTimeLeft <= 10) {
+          gameTimerEl.classList.add('warning');
+        }
+        
+        if (gameTimeLeft <= 0) {
+          endScoreMode();
+        }
+      }, 1000);
+    }
+
+    function updateCombo() {
+      combo++;
+      comboEl.textContent = combo;
+      comboEl.classList.remove('active');
+      void comboEl.offsetWidth; // 触发重排
+      comboEl.classList.add('active');
+      
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => {
+        combo = 0;
+        comboEl.textContent = combo;
+      }, 2000);
+    }
+
+    function calculateScore(baseScore) {
+      const comboMultiplier = 1 + Math.min(combo, 20) * 0.1;
+      return Math.floor(baseScore * comboMultiplier);
+    }
+
+    function endScoreMode() {
+      gameState = 'over';
+      clearInterval(gameTimerInterval);
+      clearTimeout(comboTimer);
+      gameTimerInterval = null;
+      comboTimer = null;
+      
+      faceBtn.textContent = FACES.win;
+      
+      if (checkNewRecord(currentLevel, score)) {
+        setTimeout(() => showNewRecordModal(score), 500);
+      }
+      
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.add('game-over');
+      });
     }
 
     function initGame(level = 'beginner') {
@@ -862,6 +1171,10 @@
       
       clearInterval(timerInterval);
       timerInterval = null;
+      
+      if (currentMode === 'score') {
+        initScoreMode();
+      }
       
       for (let r = 0; r < rows; r++) {
         grid[r] = [];
@@ -1027,7 +1340,9 @@
       
       if (data.isRevealed && data.adjacentMines > 0) {
         autoReveal(row, col);
-        checkWin();
+        if (currentMode === 'classic') {
+          checkWin();
+        }
         return;
       }
       
@@ -1036,24 +1351,40 @@
       if (firstClick) {
         firstClick = false;
         generateMines(row, col);
-        startTimer();
+        if (currentMode === 'classic') {
+          startTimer();
+        } else {
+          startGameTimer();
+        }
       }
       
       if (data.isMine) {
-        data.isRevealed = true;
-        data.hit = true;
-        gameOver(false);
+        if (currentMode === 'classic') {
+          data.isRevealed = true;
+          data.hit = true;
+          gameOver(false);
+        } else {
+          // 得分模式下踩雷不结束，但有惩罚
+          combo = 0;
+          comboEl.textContent = combo;
+          clearTimeout(comboTimer);
+          comboTimer = null;
+        }
         return;
       }
       
       floodReveal(row, col);
-      checkWin();
+      if (currentMode === 'classic') {
+        checkWin();
+      }
     }
 
     function floodReveal(row, col) {
       const queue = [[row, col]];
       const visited = new Set();
       visited.add(`${row},${col}`);
+      
+      let revealedThisTurn = 0;
       
       while (queue.length > 0) {
         const [r, c] = queue.shift();
@@ -1063,6 +1394,7 @@
         
         data.isRevealed = true;
         revealedCount++;
+        revealedThisTurn++;
         
         if (data.adjacentMines === 0) {
           for (let dr = -1; dr <= 1; dr++) {
@@ -1080,6 +1412,14 @@
             }
           }
         }
+      }
+      
+      if (currentMode === 'score' && revealedThisTurn > 0) {
+        updateCombo();
+        const baseScore = revealedThisTurn * 10;
+        const earnedScore = calculateScore(baseScore);
+        score += earnedScore;
+        scoreEl.textContent = score;
       }
       
       renderAllCells();
@@ -1141,13 +1481,21 @@
               const neighbor = grid[nr][nc];
               if (!neighbor.isRevealed && !neighbor.isFlagged) {
                 if (neighbor.isMine) {
-                  neighbor.isRevealed = true;
-                  neighbor.hit = true;
-                  renderAllCells();
-                  gameOver(false);
-                  return;
+                  if (currentMode === 'classic') {
+                    neighbor.isRevealed = true;
+                    neighbor.hit = true;
+                    renderAllCells();
+                    gameOver(false);
+                    return;
+                  } else {
+                    combo = 0;
+                    comboEl.textContent = combo;
+                    clearTimeout(comboTimer);
+                    comboTimer = null;
+                  }
+                } else {
+                  floodReveal(nr, nc);
                 }
-                floodReveal(nr, nc);
               }
             }
           }
@@ -1239,9 +1587,19 @@
       });
     });
 
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchMode(btn.dataset.mode);
+      });
+    });
+
     submitBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim() || '匿名';
-      addRecord(currentLevel, name, timer);
+      if (currentMode === 'classic') {
+        addRecord(currentLevel, name, timer);
+      } else {
+        addRecord(currentLevel, name, score);
+      }
       hideNewRecordModal();
     });
 

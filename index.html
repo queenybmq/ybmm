@@ -643,8 +643,7 @@
 
     .score-header {
       display: flex;
-      justify-content: center;
-      gap: 32px;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
       width: 100%;
@@ -729,6 +728,11 @@
     </div>
     
     <div class="score-header" id="score-header" style="display: none;">
+      <div class="stat-box">
+        <span class="stat-icon">💣</span>
+        <span class="stat-value" id="score-mines-count">10</span>
+      </div>
+      <button class="face-btn" id="score-face-btn">😊</button>
       <div class="score-panel">
         <span class="score-icon">🌟</span>
         <span class="score-value" id="score">0</span>
@@ -848,7 +852,8 @@
     const modeBtns = document.querySelectorAll('.mode-btn');
     const scoreEl = document.getElementById('score');
     const comboEl = document.getElementById('combo');
-    const gameTimerEl = document.getElementById('game-timer');
+    const scoreMinesCountEl = document.getElementById('score-mines-count');
+    const scoreFaceBtn = document.getElementById('score-face-btn');
     const classicHeaderEl = document.querySelector('.header');
     const scoreHeaderEl = document.getElementById('score-header');
     const classicHeaderLeft = document.getElementById('classic-header-left');
@@ -1056,8 +1061,11 @@
     function initScoreMode() {
       score = 0;
       combo = 0;
+      flagCount = 0;
       scoreEl.textContent = score;
       comboEl.textContent = combo;
+      scoreMinesCountEl.textContent = totalMines;
+      scoreFaceBtn.textContent = FACES.playing;
       
       clearInterval(gameTimerInterval);
       gameTimerInterval = null;
@@ -1093,9 +1101,17 @@
       comboTimer = null;
       
       if (won) {
-        faceBtn.textContent = FACES.win;
+        if (currentMode === 'classic') {
+          faceBtn.textContent = FACES.win;
+        } else {
+          scoreFaceBtn.textContent = FACES.win;
+        }
       } else {
-        faceBtn.textContent = FACES.lose;
+        if (currentMode === 'classic') {
+          faceBtn.textContent = FACES.lose;
+        } else {
+          scoreFaceBtn.textContent = FACES.lose;
+        }
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const data = grid[r][c];
@@ -1378,6 +1394,13 @@
         const earnedScore = calculateScore(baseScore);
         score += earnedScore;
         scoreEl.textContent = score;
+        
+        const totalCells = rows * cols;
+        const safeCells = totalCells - totalMines;
+        if (revealedCount === safeCells) {
+          endScoreMode(true);
+          return;
+        }
       }
       
       renderAllCells();
@@ -1462,6 +1485,9 @@
     function updateMinesDisplay() {
       const remaining = totalMines - flagCount;
       minesCountEl.textContent = remaining < 0 ? `-${Math.abs(remaining)}` : remaining;
+      if (currentMode === 'score') {
+        scoreMinesCountEl.textContent = remaining < 0 ? `-${Math.abs(remaining)}` : remaining;
+      }
     }
 
     function renderAllCells() {
@@ -1522,7 +1548,15 @@
     }
 
     faceBtn.addEventListener('click', () => {
-      initGame(currentLevel);
+      if (currentMode === 'classic') {
+        initGame(currentLevel);
+      }
+    });
+
+    scoreFaceBtn.addEventListener('click', () => {
+      if (currentMode === 'score') {
+        initGame(currentLevel);
+      }
     });
 
     diffBtns.forEach(btn => {

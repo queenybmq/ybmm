@@ -29,6 +29,106 @@
       --bronze: #cd7f32;
     }
 
+    :root.theme-pink {
+      --bg: #fce4ec;
+      --block-base: #f8bbd9;
+      --block-highlight: #ffffff;
+      --block-shadow: #e91e63;
+      --block-dark: #c2185b;
+      --text-muted: #ad1457;
+      --text-primary: #880e4f;
+      --color-1: #64b5f6;
+      --color-2: #81c784;
+      --color-3: #e91e63;
+      --color-4: #9c27b0;
+      --color-5: #ff7043;
+      --color-6: #26c6da;
+      --color-7: #4a4a4a;
+      --color-8: #757575;
+      --mine: #4a4a4a;
+      --flag: #e91e63;
+    }
+
+    :root.theme-dark {
+      --bg: #1a1a2e;
+      --block-base: #16213e;
+      --block-highlight: #0f3460;
+      --block-shadow: #533483;
+      --block-dark: #2d2d44;
+      --text-muted: #a0a0b0;
+      --text-primary: #e0e0e0;
+      --color-1: #4fc3f7;
+      --color-2: #66bb6a;
+      --color-3: #ef5350;
+      --color-4: #ab47bc;
+      --color-5: #ffa726;
+      --color-6: #26c6da;
+      --color-7: #e0e0e0;
+      --color-8: #9e9e9e;
+      --mine: #bdbdbd;
+      --flag: #ef5350;
+    }
+
+    :root.theme-blue {
+      --bg: #e3f2fd;
+      --block-base: #bbdefb;
+      --block-highlight: #ffffff;
+      --block-shadow: #1976d2;
+      --block-dark: #1565c0;
+      --text-muted: #0d47a1;
+      --text-primary: #01579b;
+      --color-1: #1976d2;
+      --color-2: #388e3c;
+      --color-3: #d32f2f;
+      --color-4: #7b1fa2;
+      --color-5: #f57c00;
+      --color-6: #00838f;
+      --color-7: #37474f;
+      --color-8: #616161;
+      --mine: #37474f;
+      --flag: #d32f2f;
+    }
+
+    :root.theme-green {
+      --bg: #e8f5e9;
+      --block-base: #c8e6c9;
+      --block-highlight: #ffffff;
+      --block-shadow: #388e3c;
+      --block-dark: #2e7d32;
+      --text-muted: #1b5e20;
+      --text-primary: #0d47a1;
+      --color-1: #1e88e5;
+      --color-2: #388e3c;
+      --color-3: #c62828;
+      --color-4: #6a1b9a;
+      --color-5: #ef6c00;
+      --color-6: #00838f;
+      --color-7: #2e3436;
+      --color-8: #616161;
+      --mine: #2e3436;
+      --flag: #c62828;
+    }
+
+    :root.theme-yellow {
+      --bg: #fff8e1;
+      --block-base: #ffecb3;
+      --block-highlight: #ffffff;
+      --block-shadow: #ffa000;
+      --block-dark: #ff8f00;
+      --text-muted: #e65100;
+      --text-primary: #bf360c;
+      --color-1: #1565c0;
+      --color-2: #2e7d32;
+      --color-3: #d32f2f;
+      --color-4: #7b1fa2;
+      --color-5: #e65100;
+      --color-6: #006064;
+      --color-7: #3e2723;
+      --color-8: #546e7a;
+      --mine: #3e2723;
+      --flag: #d32f2f;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -438,6 +538,66 @@
 
     .custom-btn.cancel:hover {
       background: var(--block-dark);
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: var(--block-shadow);
+      border-radius: 8px;
+    }
+
+    .theme-btn {
+      width: 36px;
+      height: 36px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-btn.active {
+      border-color: var(--color-3);
+      transform: scale(1.15);
+    }
+
+    .theme-white {
+      background: linear-gradient(145deg, #ffffff, #e8e4dc);
+    }
+
+    .theme-pink {
+      background: linear-gradient(145deg, #f8bbd9, #e91e63);
+    }
+
+    .theme-dark {
+      background: linear-gradient(145deg, #16213e, #533483);
+    }
+
+    .theme-blue {
+      background: linear-gradient(145deg, #bbdefb, #1976d2);
+    }
+
+    .theme-green {
+      background: linear-gradient(145deg, #c8e6c9, #388e3c);
+    }
+
+    .theme-yellow {
+      background: linear-gradient(145deg, #ffecb3, #ffa000);
+    }
+
+    .theme-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
     }
 
     .diff-btn {
@@ -1013,6 +1173,20 @@
           </div>
           <div class="toggle-switch active" id="auto-reveal-toggle"></div>
         </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-label">主题色</span>
+            <span class="setting-desc">选择你喜欢的主题颜色</span>
+          </div>
+        </div>
+        <div class="theme-selector" id="theme-selector">
+          <button class="theme-btn theme-white active" data-theme="default" title="白色"></button>
+          <button class="theme-btn theme-pink" data-theme="pink" title="粉色"></button>
+          <button class="theme-btn theme-dark" data-theme="dark" title="黑色"></button>
+          <button class="theme-btn theme-blue" data-theme="blue" title="蓝色"></button>
+          <button class="theme-btn theme-green" data-theme="green" title="绿色"></button>
+          <button class="theme-btn theme-yellow" data-theme="yellow" title="黄色"></button>
+        </div>
       </div>
     </div>
 
@@ -1109,6 +1283,7 @@
     let currentMode = 'classic';
     let leaderboards = {};
     let autoRevealOnFlag = true;
+    let currentTheme = 'default';
 
     let score = 0;
     let combo = 0;
@@ -1146,19 +1321,23 @@
     const minesError = document.getElementById('mines-error');
     const customCancelBtn = document.getElementById('custom-cancel-btn');
     const customSubmitBtn = document.getElementById('custom-submit-btn');
+    const themeButtons = document.querySelectorAll('.theme-btn');
 
     function loadSettings() {
       const saved = localStorage.getItem('minesweeper_settings');
       if (saved) {
         const settings = JSON.parse(saved);
         autoRevealOnFlag = settings.autoRevealOnFlag !== undefined ? settings.autoRevealOnFlag : true;
+        currentTheme = settings.theme || 'default';
       }
       updateAutoRevealToggle();
+      applyTheme(currentTheme);
     }
 
     function saveSettings() {
       localStorage.setItem('minesweeper_settings', JSON.stringify({
-        autoRevealOnFlag
+        autoRevealOnFlag,
+        theme: currentTheme
       }));
     }
 
@@ -2001,6 +2180,29 @@
       if (customModal.style.display === 'block' && !customModal.contains(e.target)) {
         hideCustomModal();
       }
+    });
+
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      root.classList.remove('theme-pink', 'theme-dark', 'theme-blue', 'theme-green', 'theme-yellow');
+      if (theme !== 'default') {
+        root.classList.add(`theme-${theme}`);
+      }
+      currentTheme = theme;
+      themeButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.theme === theme) {
+          btn.classList.add('active');
+        }
+      });
+      saveSettings();
+    }
+
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        applyTheme(theme);
+      });
     });
 
     loadSettings();

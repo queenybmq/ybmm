@@ -323,6 +323,7 @@
 
     .difficulty-selector {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       padding: 8px;
       background: var(--block-shadow);
@@ -330,6 +331,113 @@
       box-shadow: 
         inset 2px 2px 4px var(--block-dark),
         inset -2px -2px 4px var(--block-highlight);
+    }
+
+    .custom-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--block-highlight);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+      min-width: 280px;
+      max-width: 90vw;
+    }
+
+    .custom-modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .custom-input-group {
+      margin-bottom: 14px;
+    }
+
+    .custom-input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .custom-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--block-shadow);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s ease;
+      background: var(--bg);
+    }
+
+    .custom-input:focus {
+      border-color: var(--color-3);
+    }
+
+    .custom-input.error {
+      border-color: var(--color-3);
+    }
+
+    .custom-error {
+      font-size: 11px;
+      color: var(--color-3);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .custom-error.show {
+      display: block;
+    }
+
+    .custom-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .custom-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .custom-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .custom-btn.submit {
+      background: var(--color-3);
+      color: white;
+    }
+
+    .custom-btn.submit:hover {
+      background: #c55555;
+    }
+
+    .custom-btn.cancel {
+      background: var(--block-shadow);
+      color: var(--text-primary);
+    }
+
+    .custom-btn.cancel:hover {
+      background: var(--block-dark);
     }
 
     .diff-btn {
@@ -883,6 +991,10 @@
         <span class="diff-icon">🌳</span>
         <span>高级</span>
       </button>
+      <button class="diff-btn" data-level="custom">
+        <span class="diff-icon">⚙️</span>
+        <span>自定义</span>
+      </button>
     </div>
 
     <div class="settings-section">
@@ -942,12 +1054,41 @@
     </div>
   </div>
 
+  <div id="custom-modal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-title">🎮 自定义地图</div>
+    <div class="custom-input-group">
+      <label class="custom-input-label">行数</label>
+      <input type="number" class="custom-input" id="custom-rows" min="5" max="30" value="10">
+      <span class="custom-hint">范围: 5-30</span>
+      <span class="custom-error" id="rows-error">行数必须在5-30之间</span>
+    </div>
+    <div class="custom-input-group">
+      <label class="custom-input-label">列数</label>
+      <input type="number" class="custom-input" id="custom-cols" min="5" max="50" value="10">
+      <span class="custom-hint">范围: 5-50</span>
+      <span class="custom-error" id="cols-error">列数必须在5-50之间</span>
+    </div>
+    <div class="custom-input-group">
+      <label class="custom-input-label">地雷数</label>
+      <input type="number" class="custom-input" id="custom-mines" min="1" value="15">
+      <span class="custom-hint" id="mines-hint">范围: 1-计算中...</span>
+      <span class="custom-error" id="mines-error">地雷数超出范围</span>
+    </div>
+    <div class="custom-buttons">
+      <button class="custom-btn cancel" id="custom-cancel-btn">取消</button>
+      <button class="custom-btn submit" id="custom-submit-btn">确定</button>
+    </div>
+  </div>
+
   <script>
     const DIFFICULTIES = {
       beginner: { rows: 9, cols: 9, mines: 10, name: '初级' },
       intermediate: { rows: 16, cols: 16, mines: 40, name: '中级' },
-      expert: { rows: 16, cols: 30, mines: 99, name: '高级' }
+      expert: { rows: 16, cols: 30, mines: 99, name: '高级' },
+      custom: { rows: 10, cols: 10, mines: 15, name: '自定义' }
     };
+
+    let customConfig = { rows: 10, cols: 10, mines: 15 };
 
     const FACES = {
       normal: '😊',
@@ -995,6 +1136,16 @@
     const scoreDisplayEl = document.getElementById('score-display');
     const settingsToggle = document.getElementById('settings-toggle');
     const settingsPanel = document.getElementById('settings-panel');
+    const customModal = document.getElementById('custom-modal');
+    const customRowsInput = document.getElementById('custom-rows');
+    const customColsInput = document.getElementById('custom-cols');
+    const customMinesInput = document.getElementById('custom-mines');
+    const minesHint = document.getElementById('mines-hint');
+    const rowsError = document.getElementById('rows-error');
+    const colsError = document.getElementById('cols-error');
+    const minesError = document.getElementById('mines-error');
+    const customCancelBtn = document.getElementById('custom-cancel-btn');
+    const customSubmitBtn = document.getElementById('custom-submit-btn');
 
     function loadSettings() {
       const saved = localStorage.getItem('minesweeper_settings');
@@ -1256,7 +1407,12 @@
 
     function initGame(level = 'beginner') {
       currentLevel = level;
-      const config = DIFFICULTIES[level];
+      let config;
+      if (level === 'custom') {
+        config = customConfig;
+      } else {
+        config = DIFFICULTIES[level];
+      }
       rows = config.rows;
       cols = config.cols;
       totalMines = config.mines;
@@ -1694,16 +1850,6 @@
       }
     });
 
-    diffBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        diffBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const level = btn.dataset.level;
-        currentLevel = level;
-        initGame(level);
-      });
-    });
-
     leaderboardTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         leaderboardTabs.forEach(t => t.classList.remove('active'));
@@ -1747,6 +1893,111 @@
       autoRevealOnFlag = !autoRevealOnFlag;
       updateAutoRevealToggle();
       saveSettings();
+    });
+
+    function updateMinesHint() {
+      const r = parseInt(customRowsInput.value) || 10;
+      const c = parseInt(customColsInput.value) || 10;
+      const maxMines = Math.floor(r * c * 0.8) - 9;
+      minesHint.textContent = `范围: 1-${maxMines}`;
+      customMinesInput.max = maxMines;
+    }
+
+    customRowsInput.addEventListener('input', updateMinesHint);
+    customColsInput.addEventListener('input', updateMinesHint);
+
+    function showCustomModal() {
+      customRowsInput.value = customConfig.rows;
+      customColsInput.value = customConfig.cols;
+      customMinesInput.value = customConfig.mines;
+      updateMinesHint();
+      modalOverlay.style.display = 'block';
+      customModal.style.display = 'block';
+      rowsError.classList.remove('show');
+      colsError.classList.remove('show');
+      minesError.classList.remove('show');
+      customRowsInput.classList.remove('error');
+      customColsInput.classList.remove('error');
+      customMinesInput.classList.remove('error');
+    }
+
+    function hideCustomModal() {
+      modalOverlay.style.display = 'none';
+      customModal.style.display = 'none';
+    }
+
+    function validateCustomInput() {
+      const r = parseInt(customRowsInput.value);
+      const c = parseInt(customColsInput.value);
+      const m = parseInt(customMinesInput.value);
+      
+      let isValid = true;
+      
+      if (isNaN(r) || r < 5 || r > 30) {
+        rowsError.classList.add('show');
+        customRowsInput.classList.add('error');
+        isValid = false;
+      } else {
+        rowsError.classList.remove('show');
+        customRowsInput.classList.remove('error');
+      }
+      
+      if (isNaN(c) || c < 5 || c > 50) {
+        colsError.classList.add('show');
+        customColsInput.classList.add('error');
+        isValid = false;
+      } else {
+        colsError.classList.remove('show');
+        customColsInput.classList.remove('error');
+      }
+      
+      const maxMines = Math.floor(r * c * 0.8) - 9;
+      if (isNaN(m) || m < 1 || m > maxMines) {
+        minesError.classList.add('show');
+        customMinesInput.classList.add('error');
+        isValid = false;
+      } else {
+        minesError.classList.remove('show');
+        customMinesInput.classList.remove('error');
+      }
+      
+      return isValid;
+    }
+
+    diffBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const level = btn.dataset.level;
+        if (level === 'custom') {
+          showCustomModal();
+        } else {
+          diffBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentLevel = level;
+          initGame(level);
+        }
+      });
+    });
+
+    customCancelBtn.addEventListener('click', hideCustomModal);
+
+    customSubmitBtn.addEventListener('click', () => {
+      if (validateCustomInput()) {
+        customConfig = {
+          rows: parseInt(customRowsInput.value),
+          cols: parseInt(customColsInput.value),
+          mines: parseInt(customMinesInput.value)
+        };
+        hideCustomModal();
+        diffBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-level="custom"]').classList.add('active');
+        initGame('custom');
+      }
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (customModal.style.display === 'block' && !customModal.contains(e.target)) {
+        hideCustomModal();
+      }
     });
 
     loadSettings();

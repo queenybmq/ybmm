@@ -1664,46 +1664,53 @@
     }
 
     function renderLeaderboard(level) {
-      const records = currentMode === 'classic' ? (leaderboards[level] || []) : (scoreLeaderboards[level] || []);
-      leaderboardListEl.innerHTML = '';
-      
-      if (records.length === 0) {
-        leaderboardListEl.innerHTML = '<li class="leaderboard-empty">暂无记录</li>';
-        return;
-      }
-      
-      const sortedRecords = currentMode === 'classic' 
-        ? [...records].sort((a, b) => a.time - b.time)
-        : [...records].sort((a, b) => b.score - a.score);
-      
-      sortedRecords.slice(0, 5).forEach((record, index) => {
-        const li = document.createElement('li');
-        li.className = 'leaderboard-item';
+      try {
+        const records = currentMode === 'classic' ? (leaderboards[level] || []) : (scoreLeaderboards[level] || []);
+        leaderboardListEl.innerHTML = '';
         
-        const rankSpan = document.createElement('span');
-        rankSpan.className = 'leaderboard-rank';
-        if (index === 0) rankSpan.classList.add('gold');
-        else if (index === 1) rankSpan.classList.add('silver');
-        else if (index === 2) rankSpan.classList.add('bronze');
-        rankSpan.textContent = index + 1;
-        
-        const dateSpan = document.createElement('span');
-        dateSpan.className = 'leaderboard-name';
-        dateSpan.textContent = record.date;
-        
-        const valueSpan = document.createElement('span');
-        valueSpan.className = 'leaderboard-time';
-        if (currentMode === 'classic') {
-          valueSpan.textContent = record.time + '秒';
-        } else {
-          valueSpan.textContent = record.score + '分';
+        if (!Array.isArray(records) || records.length === 0) {
+          leaderboardListEl.innerHTML = '<li class="leaderboard-empty">暂无记录</li>';
+          return;
         }
         
-        li.appendChild(rankSpan);
-        li.appendChild(dateSpan);
-        li.appendChild(valueSpan);
-        leaderboardListEl.appendChild(li);
-      });
+        const sortedRecords = currentMode === 'classic' 
+          ? [...records].filter(r => r && typeof r.time === 'number').sort((a, b) => a.time - b.time)
+          : [...records].filter(r => r && typeof r.score === 'number').sort((a, b) => b.score - a.score);
+        
+        sortedRecords.slice(0, 5).forEach((record, index) => {
+          if (!record) return;
+          
+          const li = document.createElement('li');
+          li.className = 'leaderboard-item';
+          
+          const rankSpan = document.createElement('span');
+          rankSpan.className = 'leaderboard-rank';
+          if (index === 0) rankSpan.classList.add('gold');
+          else if (index === 1) rankSpan.classList.add('silver');
+          else if (index === 2) rankSpan.classList.add('bronze');
+          rankSpan.textContent = index + 1;
+          
+          const dateSpan = document.createElement('span');
+          dateSpan.className = 'leaderboard-name';
+          dateSpan.textContent = record.date || '未知时间';
+          
+          const valueSpan = document.createElement('span');
+          valueSpan.className = 'leaderboard-time';
+          if (currentMode === 'classic') {
+            valueSpan.textContent = (record.time || 0) + '秒';
+          } else {
+            valueSpan.textContent = (record.score || 0) + '分';
+          }
+          
+          li.appendChild(rankSpan);
+          li.appendChild(dateSpan);
+          li.appendChild(valueSpan);
+          leaderboardListEl.appendChild(li);
+        });
+      } catch (error) {
+        console.error('渲染排行榜出错:', error);
+        leaderboardListEl.innerHTML = '<li class="leaderboard-empty">暂无记录</li>';
+      }
     }
 
     function formatTime(seconds) {
@@ -1713,47 +1720,59 @@
     }
 
     function checkNewRecord(level, timeOrScore) {
-      if (level === 'custom') {
+      try {
+        if (level === 'custom') {
+          return false;
+        }
+        if (currentMode === 'classic') {
+          const records = leaderboards[level] || [];
+          if (!Array.isArray(records) || records.length < 5) return true;
+          const validRecords = records.filter(r => r && typeof r.time === 'number');
+          if (validRecords.length < 5) return true;
+          const worstTime = Math.max(...validRecords.map(r => r.time));
+          return timeOrScore < worstTime;
+        } else {
+          const records = scoreLeaderboards[level] || [];
+          if (!Array.isArray(records) || records.length < 5) return true;
+          const validRecords = records.filter(r => r && typeof r.score === 'number');
+          if (validRecords.length < 5) return true;
+          const worstScore = Math.min(...validRecords.map(r => r.score));
+          return timeOrScore > worstScore;
+        }
+      } catch (error) {
+        console.error('检查新纪录出错:', error);
         return false;
-      }
-      if (currentMode === 'classic') {
-        const records = leaderboards[level] || [];
-        if (records.length < 10) return true;
-        const worstTime = Math.max(...records.map(r => r.time));
-        return timeOrScore < worstTime;
-      } else {
-        const records = scoreLeaderboards[level] || [];
-        if (records.length < 10) return true;
-        const worstScore = Math.min(...records.map(r => r.score));
-        return timeOrScore > worstScore;
       }
     }
 
     function addRecord(level, value) {
-      const now = new Date();
-      const record = {
-        value,
-        date: `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-      };
-      
-      if (currentMode === 'classic') {
-        if (!leaderboards[level]) {
-          leaderboards[level] = [];
+      try {
+        const now = new Date();
+        const record = {
+          date: `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+        };
+        
+        if (currentMode === 'classic') {
+          if (!leaderboards[level]) {
+            leaderboards[level] = [];
+          }
+          leaderboards[level].push({ ...record, time: value });
+          leaderboards[level].sort((a, b) => a.time - b.time);
+          leaderboards[level] = leaderboards[level].slice(0, 5);
+          saveLeaderboards();
+        } else {
+          if (!scoreLeaderboards[level]) {
+            scoreLeaderboards[level] = [];
+          }
+          scoreLeaderboards[level].push({ ...record, score: value });
+          scoreLeaderboards[level].sort((a, b) => b.score - a.score);
+          scoreLeaderboards[level] = scoreLeaderboards[level].slice(0, 5);
+          saveScoreLeaderboards();
         }
-        leaderboards[level].push({ ...record, time: value });
-        leaderboards[level].sort((a, b) => a.time - b.time);
-        leaderboards[level] = leaderboards[level].slice(0, 5);
-        saveLeaderboards();
-      } else {
-        if (!scoreLeaderboards[level]) {
-          scoreLeaderboards[level] = [];
-        }
-        scoreLeaderboards[level].push({ ...record, score: value });
-        scoreLeaderboards[level].sort((a, b) => b.score - a.score);
-        scoreLeaderboards[level] = scoreLeaderboards[level].slice(0, 5);
-        saveScoreLeaderboards();
+        renderLeaderboard(level);
+      } catch (error) {
+        console.error('添加纪录出错:', error);
       }
-      renderLeaderboard(level);
     }
 
 
@@ -1813,33 +1832,39 @@
     }
 
     function endScoreMode(won) {
-      gameState = 'over';
-      clearInterval(gameTimerInterval);
-      clearTimeout(comboTimer);
-      gameTimerInterval = null;
-      comboTimer = null;
-      
-      faceBtn.textContent = won ? FACES.win : FACES.lose;
-      
-      if (!won) {
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const data = grid[r][c];
-            if (data.isMine && !data.isRevealed) {
-              data.isRevealed = true;
+      try {
+        gameState = 'over';
+        clearInterval(gameTimerInterval);
+        clearTimeout(comboTimer);
+        gameTimerInterval = null;
+        comboTimer = null;
+        
+        faceBtn.textContent = won ? FACES.win : FACES.lose;
+        
+        if (!won) {
+          if (grid && Array.isArray(grid)) {
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const data = grid[r] && grid[r][c];
+                if (data && data.isMine && !data.isRevealed) {
+                  data.isRevealed = true;
+                }
+              }
             }
           }
         }
+        
+        if (checkNewRecord(currentLevel, score)) {
+          addRecord(currentLevel, score);
+          alert(`🎉 恭喜！你获得了 ${score} 分，成功登上排行榜！`);
+        } else {
+          alert(`🎉 恭喜！你获得了 ${score} 分！`);
+        }
+        
+        renderAllCells();
+      } catch (error) {
+        console.error('得分模式结束出错:', error);
       }
-      
-      if (checkNewRecord(currentLevel, score)) {
-        addRecord(currentLevel, score);
-        alert(`🎉 恭喜！你获得了 ${score} 分，成功登上排行榜！`);
-      } else {
-        alert(`🎉 恭喜！你获得了 ${score} 分！`);
-      }
-      
-      renderAllCells();
     }
 
     function initGame(level = 'beginner') {
@@ -2252,36 +2277,45 @@
     }
 
     function gameOver(won) {
-      gameState = 'over';
-      clearInterval(timerInterval);
-      
-      if (won) {
-        faceBtn.textContent = FACES.win;
-        gridEl.classList.add('win');
-        setTimeout(() => gridEl.classList.remove('win'), 500);
+      try {
+        gameState = 'over';
+        clearInterval(timerInterval);
         
-        if (checkNewRecord(currentLevel, timer)) {
-          addRecord(currentLevel, timer);
-          alert(`🎉 恭喜！你以 ${timer} 秒完成游戏，成功登上排行榜！`);
+        if (won) {
+          faceBtn.textContent = FACES.win;
+          gridEl.classList.add('win');
+          setTimeout(() => gridEl.classList.remove('win'), 500);
+          
+          if (checkNewRecord(currentLevel, timer)) {
+            addRecord(currentLevel, timer);
+            alert(`🎉 恭喜！你以 ${timer} 秒完成游戏，成功登上排行榜！`);
+          } else {
+            alert(`🎉 恭喜！你以 ${timer} 秒完成游戏！`);
+          }
         } else {
-          alert(`🎉 恭喜！你以 ${timer} 秒完成游戏！`);
-        }
-      } else {
-        faceBtn.textContent = FACES.lose;
-        
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            if (grid[r][c].isMine && !grid[r][c].isRevealed) {
-              grid[r][c].isRevealed = true;
+          faceBtn.textContent = FACES.lose;
+          
+          if (grid && Array.isArray(grid)) {
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                if (grid[r] && grid[r][c] && grid[r][c].isMine && !grid[r][c].isRevealed) {
+                  grid[r][c].isRevealed = true;
+                }
+              }
             }
           }
+          renderAllCells();
         }
-        renderAllCells();
+        
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+          if (cell) {
+            cell.classList.add('game-over');
+          }
+        });
+      } catch (error) {
+        console.error('游戏结束出错:', error);
       }
-      
-      document.querySelectorAll('.cell').forEach(cell => {
-        cell.classList.add('game-over');
-      });
     }
 
     faceBtn.addEventListener('click', () => {

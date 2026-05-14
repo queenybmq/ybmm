@@ -1559,12 +1559,7 @@
     const diffBtns = document.querySelectorAll('.panel-diff-btn');
     const leaderboardTabs = document.querySelectorAll('.panel-leaderboard-tab');
     const leaderboardListEl = document.getElementById('leaderboard-list');
-    const newRecordModal = document.getElementById('new-record-modal');
     const modalOverlay = document.getElementById('modal-overlay');
-    const newRecordTimeEl = document.getElementById('new-record-time');
-    const playerNameInput = document.getElementById('player-name');
-    const submitBtn = document.getElementById('submit-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
     const autoRevealToggle = document.getElementById('auto-reveal-toggle');
     const modeBtns = document.querySelectorAll('.mode-btn');
     const scoreEl = document.getElementById('score');
@@ -1761,22 +1756,7 @@
       renderLeaderboard(level);
     }
 
-    function showNewRecordModal(timeOrScore) {
-      if (currentMode === 'classic') {
-        newRecordTimeEl.textContent = formatTime(timeOrScore);
-      } else {
-        newRecordTimeEl.textContent = timeOrScore;
-      }
-      playerNameInput.value = '';
-      modalOverlay.style.display = 'block';
-      newRecordModal.style.display = 'block';
-      playerNameInput.focus();
-    }
 
-    function hideNewRecordModal() {
-      modalOverlay.style.display = 'none';
-      newRecordModal.style.display = 'none';
-    }
 
     function switchMode(mode) {
       currentMode = mode;
@@ -1853,7 +1833,10 @@
       }
       
       if (checkNewRecord(currentLevel, score)) {
-        setTimeout(() => showNewRecordModal(score), 500);
+        addRecord(currentLevel, score);
+        alert(`🎉 恭喜！你获得了 ${score} 分，成功登上排行榜！`);
+      } else {
+        alert(`🎉 恭喜！你获得了 ${score} 分！`);
       }
       
       renderAllCells();
@@ -2278,7 +2261,10 @@
         setTimeout(() => gridEl.classList.remove('win'), 500);
         
         if (checkNewRecord(currentLevel, timer)) {
-          setTimeout(() => showNewRecordModal(timer), 500);
+          addRecord(currentLevel, timer);
+          alert(`🎉 恭喜！你以 ${timer} 秒完成游戏，成功登上排行榜！`);
+        } else {
+          alert(`🎉 恭喜！你以 ${timer} 秒完成游戏！`);
         }
       } else {
         faceBtn.textContent = FACES.lose;
@@ -2349,24 +2335,7 @@
       closeLeaderboardPanel();
     });
 
-    submitBtn.addEventListener('click', () => {
-      if (currentMode === 'classic') {
-        addRecord(currentLevel, timer);
-      } else {
-        addRecord(currentLevel, score);
-      }
-      hideNewRecordModal();
-    });
 
-    cancelBtn.addEventListener('click', hideNewRecordModal);
-
-    modalOverlay.addEventListener('click', hideNewRecordModal);
-
-    playerNameInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        submitBtn.click();
-      }
-    });
 
     autoRevealToggle.addEventListener('click', () => {
       autoRevealOnFlag = !autoRevealOnFlag;

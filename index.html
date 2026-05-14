@@ -1273,6 +1273,9 @@
     }
 
     function checkNewRecord(level, timeOrScore) {
+      if (level === 'custom') {
+        return false;
+      }
       if (currentMode === 'classic') {
         const records = leaderboards[level] || [];
         if (records.length < 10) return true;

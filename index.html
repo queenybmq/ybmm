@@ -1681,7 +1681,7 @@
         ? [...records].sort((a, b) => a.time - b.time)
         : [...records].sort((a, b) => b.score - a.score);
       
-      sortedRecords.slice(0, 10).forEach((record, index) => {
+      sortedRecords.slice(0, 5).forEach((record, index) => {
         const li = document.createElement('li');
         li.className = 'leaderboard-item';
         
@@ -1692,20 +1692,20 @@
         else if (index === 2) rankSpan.classList.add('bronze');
         rankSpan.textContent = index + 1;
         
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'leaderboard-name';
-        nameSpan.textContent = record.name;
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'leaderboard-name';
+        dateSpan.textContent = record.date;
         
         const valueSpan = document.createElement('span');
         valueSpan.className = 'leaderboard-time';
         if (currentMode === 'classic') {
-          valueSpan.textContent = formatTime(record.time);
+          valueSpan.textContent = record.time + '秒';
         } else {
-          valueSpan.textContent = record.score;
+          valueSpan.textContent = record.score + '分';
         }
         
         li.appendChild(rankSpan);
-        li.appendChild(nameSpan);
+        li.appendChild(dateSpan);
         li.appendChild(valueSpan);
         leaderboardListEl.appendChild(li);
       });
@@ -1734,22 +1734,28 @@
       }
     }
 
-    function addRecord(level, name, timeOrScore) {
+    function addRecord(level, value) {
+      const now = new Date();
+      const record = {
+        value,
+        date: `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      };
+      
       if (currentMode === 'classic') {
         if (!leaderboards[level]) {
           leaderboards[level] = [];
         }
-        leaderboards[level].push({ name, time: timeOrScore });
+        leaderboards[level].push({ ...record, time: value });
         leaderboards[level].sort((a, b) => a.time - b.time);
-        leaderboards[level] = leaderboards[level].slice(0, 10);
+        leaderboards[level] = leaderboards[level].slice(0, 5);
         saveLeaderboards();
       } else {
         if (!scoreLeaderboards[level]) {
           scoreLeaderboards[level] = [];
         }
-        scoreLeaderboards[level].push({ name, score: timeOrScore });
+        scoreLeaderboards[level].push({ ...record, score: value });
         scoreLeaderboards[level].sort((a, b) => b.score - a.score);
-        scoreLeaderboards[level] = scoreLeaderboards[level].slice(0, 10);
+        scoreLeaderboards[level] = scoreLeaderboards[level].slice(0, 5);
         saveScoreLeaderboards();
       }
       renderLeaderboard(level);
@@ -2344,11 +2350,10 @@
     });
 
     submitBtn.addEventListener('click', () => {
-      const name = playerNameInput.value.trim() || '匿名';
       if (currentMode === 'classic') {
-        addRecord(currentLevel, name, timer);
+        addRecord(currentLevel, timer);
       } else {
-        addRecord(currentLevel, name, score);
+        addRecord(currentLevel, score);
       }
       hideNewRecordModal();
     });
